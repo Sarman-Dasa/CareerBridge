@@ -48,6 +48,7 @@ dist-ssr
 *.sln
 *.sw?
 .yarn
+/.vscode
 
 # iconify dist files
 resources/ts/@iconify/*.js

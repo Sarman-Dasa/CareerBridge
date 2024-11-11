@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { VForm } from 'vuetify/components/VForm'
 
+import { postRequest } from '@/services/apiService'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
@@ -19,9 +20,41 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const isPasswordVisible = ref(false)
 
 const refVForm = ref<VForm>()
-const email = ref('admin@demo.com')
-const password = ref('admin')
+const email = ref('dasa007@gmail.com')
+const password = ref('12345678')
 const rememberMe = ref(false)
+const route = useRoute()
+const router = useRouter()
+
+const errors = ref<Record<string, string | undefined>>({
+  email: undefined,
+  password: undefined,
+})
+
+const login = async() => {
+  let response = await postRequest('/api/login',{ email: email.value, password: password.value });
+    if(response && response.status == 200) {
+
+      const { token, user } = response.data;
+      console.log('response: ', response.data);
+      console.log('token, user: ', token, user);
+
+      localStorage.setItem('userData', JSON.stringify(user))
+      localStorage.setItem('accessToken', JSON.stringify(token))
+
+      // Redirect to `to` query if exist or redirect to index route
+      router.replace(route.query.to ? String(route.query.to) : '/')
+    }
+}
+
+const onSubmit = () => {
+  refVForm.value?.validate()
+    .then(({ valid: isValid }) => {
+      if (isValid)
+        login()
+    })
+}
+
 </script>
 
 <template>
@@ -92,7 +125,7 @@ const rememberMe = ref(false)
         <VCardText>
           <VForm
             ref="refVForm"
-            @submit="() => { }"
+           @submit.prevent="onSubmit"
           >
             <VRow>
               <!-- email -->
@@ -120,12 +153,12 @@ const rememberMe = ref(false)
                     v-model="rememberMe"
                     label="Remember me"
                   />
-                  <a
-                    class="text-primary ms-2 mb-1"
-                    href="#"
-                  >
-                    Forgot Password?
-                  </a>
+                  <RouterLink
+                  class="text-primary ms-2"
+                  :to="{ name: 'forgot-password' }"
+                >
+                 Forgot Password?
+                </RouterLink>
                 </div>
 
                 <VBtn
@@ -143,12 +176,12 @@ const rememberMe = ref(false)
               >
                 <span>New on our platform?</span>
 
-                <a
+                <RouterLink
                   class="text-primary ms-2"
-                  href="#"
+                  :to="{ name: 'register' }"
                 >
                   Create an account
-                </a>
+                </RouterLink>
               </VCol>
 
               <VCol
