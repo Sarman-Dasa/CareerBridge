@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Post;
+use App\Traits\ManageFiles;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
+class PostController extends Controller
+{
+
+    use ManageFiles;
+    public function list(Request $request)
+    {
+        return Post::all();
+    }
+
+    public function create(Request $request)
+    {
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'status' => 'in:D,P',
+            'visibility' => 'in:P,C',
+            'comment_control' => 'in:A,C,N',
+            'files.*' => 'nullable|mimes:jpg,jpeg,png,pdf',
+        ]);
+
+        $request['user_id'] = Auth::id();
+
+        $post = Post::create($request->only('user_id', 'title', 'content', 'status', 'visibility', 'comment_control'));
+
+        $newAttachment = [];
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                log::info($file);
+                $newAttachment[] = [
+                    'file_path' => $this->uploadFile($file, 'files/post_attachments'),
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_type' =>  $file->getClientOriginalExtension(),
+                ];
+            }
+        }
+
+        $post->attachments()->createMany($newAttachment);
+
+        return ok(__('strings.post.create'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $post = Post::findOrFail($id);
+
+        $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'content' => 'sometimes|string',
+            'status' => 'in:D,P',
+            'visibility' => 'in:P,C',
+            'comment_control' => 'in:A,C,N',
+        ]);
+
+
+        $post->update($request->only('title', 'content', 'status', 'visibility', 'comment_control'));
+
+        return ok(__('strings.post.update'));
+    }
+
+    public function delete($id)
+    {
+        $post = Post::findOrFail($id);
+
+        foreach ($post->attachments as $attachment) {
+            $this->deleteFile($attachment->file_path);
+            $attachment->delete();
+        }
+
+        $post->delete();
+
+        return ok(__('strings.post.delete'));
+    }
+
+    public function postLike($id)
+    {
+
+        $user = Auth::user();
+        $post = Post::findOrFail($id);
+        // Check if the user has already liked the post
+        if (!$user->likedPosts()->where('post_id', $id)->exists()) {
+            $user->likedPosts()->attach($post->id);
+            return ok(__('strings.post.like_post'));
+        } else {
+            $user->likedPosts()->detach($post->id);
+            return ok(__('strings.post.dislike_post'));
+        }
+    }
+}
