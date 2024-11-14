@@ -37,7 +37,7 @@ const errors = ref<Record<string, string | undefined>>({
 
 const register = async () => {
 
-  let response = await postRequest("/api/register", {
+  let response = await postRequest("/register", {
     first_name:first_name.value,
     last_name:last_name.value,
     username: username.value,

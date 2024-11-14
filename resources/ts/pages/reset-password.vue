@@ -19,7 +19,7 @@ form.value.email = route.query?.email;
 form.value.token = route.query?.token;
 
 async function onSubmit() {
-  let response = await postRequest("/api/reset-password", {
+  let response = await postRequest("/reset-password", {
     email: form.value.email,
     password: form.value.newPassword,
     password_confirmation: form.value.confirmPassword,

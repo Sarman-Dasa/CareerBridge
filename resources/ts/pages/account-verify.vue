@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { postRequest } from '@/services/apiService';
 const route = useRoute()
-console.log('route: ', route.query);
 const router = useRouter()
 
 const email = ref(route.query.email);
@@ -9,7 +8,7 @@ const token = ref(route.query.token);
 
 
 async function verifyUserAccount() {
-  let response  = await  postRequest('/api/account-verify',{
+  let response  = await  postRequest('/account-verify',{
       email: email.value,
       token: token.value
     });
@@ -17,21 +16,6 @@ async function verifyUserAccount() {
     if(response && response.status == 200) {
       router.replace("login");
     }
-  // await axiosIns
-  //   .post("/api/account-verify", {
-  //     email: email.value,
-  //     token: token.value
-  //   })
-  //   .then((response) => {
-  //     let data = response.data.data;
-  //     let token = data.token;
-  //     console.log('token: ', token);
-  //     let user_info = data.user;
-      
-  //   })
-  //   .catch((e) => {
-  //     console.log("Error", e);
-  //   });
 }
 
 

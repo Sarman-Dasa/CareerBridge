@@ -5,6 +5,10 @@ import routes from '~pages';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/user-profile/:tab(profile|connections)?',
+      redirect: () => ({ name: 'user-user-profile-tab', params: { tab: 'profile' } }),
+    },
     ...setupLayouts(routes),
   ],
 })

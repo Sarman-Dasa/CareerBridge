@@ -20,8 +20,8 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const isPasswordVisible = ref(false)
 
 const refVForm = ref<VForm>()
-const email = ref('dasa007@gmail.com')
-const password = ref('12345678')
+const email = ref('sarman@gmail.com')
+const password = ref('admin@123')
 const rememberMe = ref(false)
 const route = useRoute()
 const router = useRouter()
@@ -32,12 +32,11 @@ const errors = ref<Record<string, string | undefined>>({
 })
 
 const login = async() => {
-  let response = await postRequest('/api/login',{ email: email.value, password: password.value });
+  let response = await postRequest('/login',{ email: email.value, password: password.value });
     if(response && response.status == 200) {
 
       const { token, user } = response.data;
-      console.log('response: ', response.data);
-      console.log('token, user: ', token, user);
+      
 
       localStorage.setItem('userData', JSON.stringify(user))
       localStorage.setItem('accessToken', JSON.stringify(token))

@@ -1,10 +1,12 @@
-import router from '@/router'
-import axios from 'axios'
+import router from '@/router';
+import axios from 'axios';
+
+const baseURL = import.meta.env.VITE_API_URL
 
 const axiosIns = axios.create({
   // You can add your headers here
   // ================================
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: baseURL,
   // timeout: 1000,
   headers: {
     Accept: "application/json",

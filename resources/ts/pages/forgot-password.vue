@@ -28,7 +28,7 @@ const onSubmit = () => {
 }
 
 async function forgotPassword() {
-  let response = await postRequest('/api/forgot-password',{ email: email.value});
+  let response = await postRequest('/forgot-password',{ email: email.value});
     if(response && response.status == 200) {
     }
 }
