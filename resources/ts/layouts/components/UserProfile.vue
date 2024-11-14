@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import avatar1 from '@images/avatars/avatar-1.png'
+import { useUserStore } from '@/pages/user-profile/useUserStore';
+import avatar1 from '@images/avatars/avatar-1.png';
+
+const userStore = useUserStore();
 </script>
 
 <template>
@@ -48,15 +51,15 @@ import avatar1 from '@images/avatars/avatar-1.png'
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ userStore.user.full_name}}
             </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
+            <VListItemSubtitle>{{ userStore.user.role_name}}</VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link>
+          <VListItem link :to="{ name: 'user-user-profile-tab', params: { tab: 'profile' } }">
             <template #prepend>
               <VIcon
                 class="me-2"
