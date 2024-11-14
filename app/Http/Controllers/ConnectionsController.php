@@ -2,11 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\ListingApiTrait;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ConnectionsController extends Controller
 {
+
+    use ListingApiTrait;
+    public function list(Request $request)
+    {
+        $user = Auth::user();
+
+        $this->ListingValidation();
+
+        $sentConnectionsQuery = $user->connections()
+            ->wherePivotIn('status', ['P', 'A'])->select('id', 'first_name', 'last_name', 'role', 'profile_image', 'mobile');
+
+        $sentConnections = $this->filterSortPagination($sentConnectionsQuery);
+
+        // Fetch the user's received connections (Pending or Accepted)
+        $receivedConnectionsQuery = $user->connectionRequestsReceived()
+            ->wherePivotIn('status', ['P', 'A'])->select('id', 'first_name', 'last_name', 'role', 'profile_image', 'mobile');
+
+        $receivedConnections = $this->filterSortPagination($receivedConnectionsQuery);
+
+        return ok("connections list", [
+            'sentConnections' => $sentConnections['query']->get(),
+            'receivedConnections' => $receivedConnections['query']->get(),
+            'count' => [
+                'sent' => $sentConnections['count'],
+                'received' => $receivedConnections['count'],
+            ]
+        ]);
+    }
     public function create(Request $request)
     {
 
@@ -63,12 +93,10 @@ class ConnectionsController extends Controller
 
         // Check if the sender is trying to accept their own request
         if ($connection && $connection->pivot->user_id == $user->id) {
-            // return response()->json(['message' => 'You cannot accept a request you sent yourself.'], 403);
             return error(__('strings.connection.self_connection_error'));
         }
 
         if (!$connection) {
-            // return response()->json(['message' => 'No connection request found.'], 404);
             return error(__('strings.connection.not_found'));
         }
 
@@ -79,8 +107,7 @@ class ConnectionsController extends Controller
         }
         $connection->pivot->save();
 
-        // return response()->json(['message' => 'Connection status updated.']);
-        return error(__('strings.connection.update'));
+        return ok(__('strings.connection.update'));
     }
 
     // Delete a connection
@@ -115,6 +142,38 @@ class ConnectionsController extends Controller
         return ok(__('strings.connection.pending_requests'), [
             'requests' => $pendingRequests,
             'count'  => $pendingRequests->count()
+        ]);
+    }
+
+    public function suggestConnections()
+    {
+        $user = Auth::user();
+
+        // Get all connected user IDs (both sent and received, with Pending or Accepted status)
+        $connectedUserIds = $user->connections()
+            ->wherePivotIn('status', ['P', 'A'])
+            ->pluck('connection_id')
+            ->merge(
+                $user->connectionRequestsReceived()
+                    ->wherePivotIn('status', ['P', 'A'])
+                    ->pluck('user_id')
+            )->unique();
+
+        // Add the current user ID to exclude them from suggestions
+        $connectedUserIds->push($user->id);
+
+        // Query suggested connections who are not in the connected user list
+        $suggestedConnections = User::whereNotIn('id', $connectedUserIds)
+            ->withCount(['connections as mutual_connections_count' => function ($query) use ($connectedUserIds) {
+                // Count mutual connections by checking users in connectedUserIds
+                $query->whereIn('connection_id', $connectedUserIds);
+            }]);
+
+        $suggestedConnections = $this->filterSortPagination($suggestedConnections);
+
+        return ok(__('strings.connection.suggested_connections'), [
+            'suggestedConnections'  => $suggestedConnections['query']->get(),
+            'count'                 => $suggestedConnections['count']
         ]);
     }
 }

@@ -38,6 +38,7 @@ return [
         "delete" => "Connection removed.",
         "no_pending_requests" => "No pending connection requests.",
         "pending_requests" => "Pending connection request list.",
+        "suggested_connections"      => "suggested connection list.",
     ],
 
     "post" => [
@@ -58,5 +59,11 @@ return [
         "no_permission_create"        => "You do not have permission to comment on this post",
         "no_permission_update"        => "You do not have permission to update this comment",
         "no_access"                   => "Access denied"
+    ],
+
+    "user" => [
+        "list" => "User list.",
+        "update_profile" => "Profile update successfully.",
+        "delete_account" => "Account delete successfully."
     ]
 ];

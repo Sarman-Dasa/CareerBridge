@@ -34,8 +34,18 @@ class User extends Authenticatable
         'email_verify_token',
         'is_active',
         'email_verified_at',
+        'profile_image',
+        'cover_image',
     ];
 
+    // Define the role names
+    protected const ROLE_NAMES = [
+        'A' => 'Admin',
+        'C' => 'Candidate',
+        'E' => 'Employer',
+    ];
+
+    protected $appends  = ["full_name", "role_name", "connection_count"];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -44,7 +54,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'created_at',
         'updated_at',
         'email_verify_token',
     ];
@@ -81,7 +90,7 @@ class User extends Authenticatable
     public function connectionRequestsReceived()
     {
         return $this->belongsToMany(User::class, 'connections', 'connection_id', 'user_id')
-            ->wherePivot('status', 'P')
+            ->wherePivotIn('status', ['P', 'A']) // Only Pending and Accepted requests
             ->withPivot('status', 'request_send_date', 'request_accepted_date');
     }
 
@@ -102,5 +111,28 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Comment::class, 'comment_likes')
             ->withTimestamps();
+    }
+
+    public function getfullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    // Accessor for full role name
+    public function getRoleNameAttribute(): string
+    {
+        return self::ROLE_NAMES[$this->role] ?? 'Unknown';
+    }
+
+    public function getconnectionCountAttribute()
+    {
+        // Get the count of sent connections (Pending or Accepted)
+        $sentCount = $this->connections()->wherePivot('status', 'A')->count();
+
+        // Get the count of received connections (Pending or Accepted)
+        $receivedCount = $this->connectionRequestsReceived()->wherePivot('status',  'A')->count();
+
+        // Combine both counts
+        return $sentCount + $receivedCount;
     }
 }
