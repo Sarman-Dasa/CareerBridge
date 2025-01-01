@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class PostAttachment extends BaseModel
 {
     use HasFactory;
+    protected $primarykey = 'id';
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'post_id',

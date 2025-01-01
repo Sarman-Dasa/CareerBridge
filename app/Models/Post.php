@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Post extends BaseModel
 {
@@ -23,7 +24,7 @@ class Post extends BaseModel
         'comment_control'
     ];
 
-    protected $appends = ['likeCount'];
+    protected $appends = ['likeCount', 'commentCount', 'hasLike'];
 
 
     public function attachments()
@@ -46,5 +47,21 @@ class Post extends BaseModel
     public function getlikeCountAttribute()
     {
         return $this->likes()->count();
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'post_id', 'id');
+    }
+
+    public function getCommentCountAttribute()
+    {
+        return $this->comments()->count();
+    }
+
+    public function getHasLikeAttribute()
+    {
+        $userId = Auth::id();
+        return $this->likes()->where('user_id', $userId)->exists();
     }
 }

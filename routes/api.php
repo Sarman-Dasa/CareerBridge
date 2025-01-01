@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
         Route::post('/', 'list');
         Route::post('update-profile', 'update');
+        Route::post('post-list', 'userPostList');
     });
 
     Route::controller(ConnectionsController::class)->prefix('connection')->group(function () {
@@ -56,11 +57,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/', 'list');
         Route::post('create', 'create');
         Route::put('update/{id}', 'update');
+        Route::get('view/{id}', 'view');
         Route::delete('delete/{id}', 'delete');
         Route::post('like-dislike/{id}', 'postLike');
     });
 
     Route::controller(PostCommentController::class)->prefix('comment')->group(function () {
+        Route::post('/', 'list');
         Route::post('create', 'create');
         Route::put('update/{id}', 'update');
         Route::delete('delete/{id}', 'delete');

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\ListingApiTrait;
+use App\Http\Traits\ManageFiles;
 use App\Models\Post;
-use App\Traits\ManageFiles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -11,11 +12,47 @@ use Illuminate\Support\Facades\Log;
 class PostController extends Controller
 {
 
-    use ManageFiles;
+    use ManageFiles, ListingApiTrait;
+
     public function list(Request $request)
     {
-        return Post::all();
+        // Validate request parameters
+        $this->ListingValidation();
+
+        // Fetch posts with status 'P'
+        $posts = Post::query()
+            ->where('status', 'P')->whereNot('user_id', Auth::id()) // Only fetch posts with status 'P'
+            ->where(function ($query) {
+                $query->where('visibility', 'P') // Public visibility
+                    ->orWhere(function ($query) {
+                        $query->where('visibility', 'C') // Connected visibility
+                            ->where(function ($query) {
+                                // Check if the logged-in user is connected via connections
+                                $query->whereHas('user.connections', function ($query) {
+                                    $query->where('connection_id', Auth::id()) // Ensure logged-in user is connected
+                                        ->where('status', 'A'); // Connection is approved
+                                })
+                                    // Check if the logged-in user has received a connection request
+                                    ->orWhereHas('user.connectionRequestsReceived', function ($query) {
+                                        $query->where('user_id', Auth::id()) // Ensure logged-in user is connected
+                                            ->where('status', 'A'); // Connection is approved
+                                    });
+                            });
+                    });
+            })
+            ->with(['attachments']); // Eager load related models
+
+        // Apply sorting, filtering, and pagination
+        $posts = $this->filterSortPagination($posts);
+
+        // Return the paginated results
+        return ok(__('strings.post.user_post_list'), [
+            'posts' => $posts['query']->get(), // Fetch the posts after applying filters
+            'count' => $posts['count'], // Include the total count
+        ]);
     }
+
+
 
     public function create(Request $request)
     {
@@ -36,7 +73,6 @@ class PostController extends Controller
         $newAttachment = [];
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $file) {
-                log::info($file);
                 $newAttachment[] = [
                     'file_path' => $this->uploadFile($file, 'files/post_attachments'),
                     'file_name' => $file->getClientOriginalName(),
@@ -80,6 +116,16 @@ class PostController extends Controller
         $post->delete();
 
         return ok(__('strings.post.delete'));
+    }
+
+
+    public function view($id)
+    {
+        $post =  Post::findOrFail($id);
+
+        return ok(__('strings.post.user_post_list'), [
+            'post' => $post->load('attachments'),
+        ]);
     }
 
     public function postLike($id)

@@ -46,7 +46,8 @@ return [
         "update" => "Post updated successfully.",
         "delete" => "Post deleted successfully.",
         "like_post" => "Post liked successfully",
-        "dislike_post" => "Post dislike successfully."
+        "dislike_post" => "Post dislike successfully.",
+        "user_post_list" => "User post list"
     ],
 
     "comment" => [

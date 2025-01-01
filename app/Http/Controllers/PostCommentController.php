@@ -10,6 +10,21 @@ use Illuminate\Support\Facades\DB;
 
 class PostCommentController extends Controller
 {
+
+    public function list(Request $request)
+    {
+        $request->validate([
+            'post_id'       => 'required|exists:posts,id',
+        ]);
+
+        $comments = Comment::where('post_id', $request->post_id)->where('parent_id', null);
+        $comments = $comments->get()->load('children', 'user');
+        return ok(__('strings.comment.list'), [
+            'comments' => $comments,
+            'count' => $comments->count()
+        ]);
+    }
+
     public function create(Request $request)
     {
 

@@ -17,10 +17,10 @@ trait ManageFiles
         $fileName = $originalName . '_' . time() . '.' . $file_exe;
 
         // Store the file in the 'public' disk, which will save the file in 'storage/app/public'
-        $filePath = $file->storeAs($directory, $fileName, 'public');
+        // $filePath = $file->storeAs($directory, $fileName, 'public');
 
-
-
+        // Store the file in the 'public' disk
+        $filePath = Storage::disk('public')->putFileAs($directory, $file, $fileName);
         return $filePath;
     }
 
@@ -29,6 +29,6 @@ trait ManageFiles
         // $file = public_path($filePath);
         // Attempt to delete the file from the 'public' disk
         $result = Storage::disk('public')->delete($filePath);
-        return $result;
+        //return $result;
     }
 }
