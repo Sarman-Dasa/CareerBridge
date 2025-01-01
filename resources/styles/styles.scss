@@ -1,1 +1,62 @@
-// Write your overrides
+.post-card {
+  overflow: hidden;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 10%);
+  max-inline-size: 500px;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-carousel {
+  block-size: 150px;
+}
+
+.like-comment-count-list {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  margin-block-start: 10px;
+}
+
+.action-icons {
+  display: flex;
+  justify-content: space-between;
+  padding-block: 10px;
+  padding-inline: 0;
+}
+
+.icon-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.icon-list span {
+  color: #616161;
+  font-size: 0.75rem;
+  margin-block-start: 4px;
+}
+
+.more_btn {
+  .v-list-item {
+    padding-block: 8px;
+    padding-inline: 16px;
+  }
+
+  .v-list-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 24px; /* Ensures icon area is consistent */
+  }
+
+  .v-list-item-title {
+    flex: 1; /* Ensures text takes remaining space */
+  }
+}

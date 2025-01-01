@@ -9,7 +9,9 @@ const posts = ref<Post[]>([]);
 const postCount = ref<Number>(0);
 
 async function getPostList() {
-  const response = await postRequest('/post', {}, false);
+  const response = await postRequest('/user/post-list', {
+    post_status: 'P'
+  }, false);
 
   if (response && response.status == 200) {
     let data = response.data;
@@ -35,5 +37,5 @@ onMounted(() => {
   </v-container>
 </template>
 <style lang="scss">
-@import "../../styles/styles"
+@import "../../../../styles/styles";
 </style>

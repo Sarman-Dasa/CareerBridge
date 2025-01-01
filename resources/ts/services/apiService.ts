@@ -17,7 +17,7 @@ export const getRequest = async <T>(
 ): Promise<ApiResponse<T>> => {
   const response: AxiosResponse<T> = await axiosIns.get(url, config);
   return {
-    data: response.data,
+    data: response.data.data,
     status: response.status,
     message: response.statusText,
   };

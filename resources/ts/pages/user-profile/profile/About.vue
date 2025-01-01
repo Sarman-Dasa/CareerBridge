@@ -30,7 +30,6 @@ async function updateProfile(event: any) {
 
   const response = await postRequest('/user/update-profile', formData, false,{
     headers: {
-    Accept: "application/json",
     "Content-Type": null,
   },
   });

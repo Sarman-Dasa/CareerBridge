@@ -9,6 +9,11 @@ const router = createRouter({
       path: '/user-profile/:tab(profile|connections)?',
       redirect: () => ({ name: 'user-user-profile-tab', params: { tab: 'profile' } }),
     },
+    {
+      path: '/post/:id',
+      name: 'PostDetail',
+      component: () => import('@/pages/user-profile/post/[id].vue'),
+    },
     ...setupLayouts(routes),
   ],
 })
